@@ -13,18 +13,8 @@ import Node.Express.Response (send, setStatus)
 import Node.FS.Aff (readdir)
 import Data.String.Pattern (Pattern(..))
 import Data.Maybe (fromMaybe)
+import Html (a, li, ul)
 
-tag :: String -> String -> String
-tag name children = "<" <> name <> ">" <> children <> "</" <> name <> ">"
-
-ul :: String -> String
-ul = tag "ul"
-
-li :: String -> String
-li = tag "li"
-
-a :: String -> String -> String
-a href content = "<a href='" <> href <> "'>"<> content <>"</a>"
 
 app :: AppM Unit
 app = do
