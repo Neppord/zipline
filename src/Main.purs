@@ -15,6 +15,10 @@ import Data.String.Pattern (Pattern(..))
 import Data.Maybe (fromMaybe)
 import Html (a, li, ul)
 
+renderFileTree :: String -> Array String -> String
+renderFileTree path files = files
+    # foldMap (\file -> li (a (path <> "/" <> file) file))
+    # ul
 
 app :: AppM Unit
 app = do
@@ -24,10 +28,7 @@ app = do
         dir <- liftAff $ readdir ("." <> path)
         let linkPrefix = stripSuffix (Pattern "/") path
                 # fromMaybe path
-        dir
-            # foldMap (\file -> li (a (linkPrefix <> "/" <> file) file))
-            # ul
-            # send
+        send $ renderFileTree linkPrefix dir
 
 main :: Effect Unit
 main = void $ listenHttp app 8080 (\_ -> log "listening to port 8080")
