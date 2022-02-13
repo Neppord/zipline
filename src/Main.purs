@@ -2,7 +2,7 @@ module Main where
 
 import Prelude
 
-import Data.Array (foldMap)
+import Data.Array (foldMap, (!!))
 import Data.Maybe (fromMaybe)
 import Data.String (stripSuffix)
 import Data.String.Pattern (Pattern(..))
@@ -15,17 +15,18 @@ import Node.Express.Request (getPath)
 import Node.Express.Response (send, setStatus)
 import Node.FS.Aff (readdir, stat)
 import Node.FS.Stats (isDirectory)
+import Node.Process (argv)
 
 renderFileTree :: String -> Array String -> String
 renderFileTree path files = files
     # foldMap (\file -> li (a (path <> "/" <> file) file))
     # ul
 
-app :: AppM Unit
-app = do
+app :: String -> AppM Unit
+app baseDir = do
     get "*" $ do
         path <- getPath
-        let filePath = "." <> path
+        let filePath = baseDir <> path
         setStatus 200
         s <- liftAff $ stat filePath
         if isDirectory s then do
@@ -36,4 +37,7 @@ app = do
         else
             send "Not a directory"
 main :: Effect Unit
-main = void $ listenHttp app 8080 (\_ -> log "listening to port 8080")
+main = void do
+    args <- argv
+    let baseDir = args !! 1 # fromMaybe "."
+    listenHttp (app baseDir) 8080 (\_ -> log "listening to port 8080")
